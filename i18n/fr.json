@@ -421,7 +421,6 @@
   "enviando": "envoi en cours",
   "baixando": "téléchargement en cours",
   "Nada configurado ainda: abra os Ajustes no menu da barra.": "Rien n’est encore configuré : ouvrez Réglages depuis la barre des menus.",
-  "Clique no notch pra abrir": "Cliquez sur l’encoche pour l’ouvrir",
   "Boas-vindas": "Bienvenue",
   "menos de 1 MB": "moins de 1 Mo",
   "unidade|GB": "Go",
@@ -669,5 +668,11 @@
   "pergunta vazia": "question vide",
   "{0} · há {1}": "{0} · il y a {1}",
   "nada sincronizando agora": "aucune synchro en cours",
-  "swap {0} {1}": "swap {0} {1}"
+  "swap {0} {1}": "swap {0} {1}",
+  "Clique no notch pra abrir · botão direito: Ajustes": "Cliquez sur l’encoche pour l’ouvrir · clic droit : Réglages",
+  "Na barra de menus": "Dans la barre des menus",
+  "Automático": "Automatique",
+  "Ícone e o Mac mais exigido": "Icône et le Mac le plus sollicité",
+  "Só o ícone": "Icône seule",
+  "No automático, Mac com notch mostra só o ícone: o que não cabe à direita do notch o macOS esconde. Os Ajustes também abrem com o botão direito no notch.": "En automatique, un Mac avec encoche n’affiche que l’icône : macOS masque ce qui ne tient pas à droite de l’encoche. Les Réglages s’ouvrent aussi d’un clic droit sur l’encoche."
 }

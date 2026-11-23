@@ -8,7 +8,7 @@ Cada Mac, cada servidor, cada agente de IA e cada assinatura de IA que você usa
 macOS nativo. Só leitura. Sem servidor, sem conta, nada instalado nas máquinas que ele olha.
 
 [![Instagram @eduardocavalcanti](https://img.shields.io/badge/Instagram-@eduardocavalcanti-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/eduardocavalcanti/)<br>
-**Feito pelo [Eduardo Cavalcanti](https://www.instagram.com/eduardocavalcanti/).** Mostro como eu toco minhas empresas com agentes de IA e uma frota de Macs: acompanha no Instagram, [@eduardocavalcanti](https://www.instagram.com/eduardocavalcanti/).
+**Feito pelo [Edu Cavalcanti](https://www.instagram.com/eduardocavalcanti/).** Mostro como eu toco minhas empresas com agentes de IA e uma frota de Macs: acompanha no Instagram, [@eduardocavalcanti](https://www.instagram.com/eduardocavalcanti/).
 
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](#instalar)
 [![Swift](https://img.shields.io/badge/Swift-SwiftUI%20%2B%20AppKit-F05138?logo=swift&logoColor=white)](#arquitetura)

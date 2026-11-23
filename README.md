@@ -8,7 +8,7 @@ Every Mac, every server, every AI agent and AI subscription you run, at a glance
 Native macOS. Read-only. No server, no account, nothing installed on the machines it watches.
 
 [![Instagram @eduardocavalcanti](https://img.shields.io/badge/Instagram-@eduardocavalcanti-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/eduardocavalcanti/)<br>
-**Built by [Eduardo Cavalcanti](https://www.instagram.com/eduardocavalcanti/).** I share how I run my companies with AI agents and a fleet of Macs: follow along on Instagram, [@eduardocavalcanti](https://www.instagram.com/eduardocavalcanti/).
+**Built by [Edu Cavalcanti](https://www.instagram.com/eduardocavalcanti/).** I share how I run my companies with AI agents and a fleet of Macs: follow along on Instagram, [@eduardocavalcanti](https://www.instagram.com/eduardocavalcanti/).
 
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](#install)
 [![Swift](https://img.shields.io/badge/Swift-SwiftUI%20%2B%20AppKit-F05138?logo=swift&logoColor=white)](#architecture)

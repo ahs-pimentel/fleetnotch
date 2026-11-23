@@ -421,7 +421,6 @@
   "enviando": "subiendo",
   "baixando": "descargando",
   "Nada configurado ainda: abra os Ajustes no menu da barra.": "Aún no hay nada configurado: abre Ajustes en el menú de la barra.",
-  "Clique no notch pra abrir": "Haz clic en el notch para abrirlo",
   "Boas-vindas": "Bienvenida",
   "menos de 1 MB": "menos de 1 MB",
   "unidade|GB": "GB",
@@ -669,5 +668,11 @@
   "pergunta vazia": "pregunta vacía",
   "{0} · há {1}": "{0} · hace {1}",
   "nada sincronizando agora": "nada sincronizando ahora",
-  "swap {0} {1}": "swap {0} {1}"
+  "swap {0} {1}": "swap {0} {1}",
+  "Clique no notch pra abrir · botão direito: Ajustes": "Haz clic en el notch para abrirlo · clic derecho: Ajustes",
+  "Na barra de menus": "En la barra de menús",
+  "Automático": "Automático",
+  "Ícone e o Mac mais exigido": "Icono y el Mac más exigido",
+  "Só o ícone": "Solo el icono",
+  "No automático, Mac com notch mostra só o ícone: o que não cabe à direita do notch o macOS esconde. Os Ajustes também abrem com o botão direito no notch.": "En automático, un Mac con notch muestra solo el icono: macOS oculta lo que no cabe a la derecha del notch. Los Ajustes también se abren con clic derecho en el notch."
 }

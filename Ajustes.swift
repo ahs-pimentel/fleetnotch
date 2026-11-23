@@ -294,8 +294,19 @@ struct AbaGeral: View {
 
 struct AbaAparencia: View {
     @ObservedObject var store: ConfigStore
+    @AppStorage("barraTexto") private var barraTexto = "auto"
     var body: some View {
         Form {
+            Section {
+                Picker(t("Na barra de menus"), selection: $barraTexto) {
+                    Text(t("Automático")).tag("auto")
+                    Text(t("Ícone e o Mac mais exigido")).tag("texto")
+                    Text(t("Só o ícone")).tag("icone")
+                }
+            } footer: {
+                Text(t("No automático, Mac com notch mostra só o ícone: o que não cabe à direita do notch o macOS esconde. Os Ajustes também abrem com o botão direito no notch."))
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section(t("Ilha")) {
                 Toggle(t("Mostrar a ilha no topo da tela"), isOn: $store.c.aparencia.ilha)
                 Picker(t("Telas"), selection: $store.c.aparencia.todasTelas) {

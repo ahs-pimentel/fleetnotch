@@ -421,7 +421,6 @@
   "enviando": "uploading",
   "baixando": "downloading",
   "Nada configurado ainda: abra os Ajustes no menu da barra.": "Nothing set up yet: open Settings from the menu bar.",
-  "Clique no notch pra abrir": "Click the notch to open",
   "Boas-vindas": "Welcome",
   "menos de 1 MB": "less than 1 MB",
   "unidade|GB": "GB",
@@ -669,5 +668,11 @@
   "pergunta vazia": "empty question",
   "{0} · há {1}": "{0} · {1} ago",
   "nada sincronizando agora": "nothing syncing now",
-  "swap {0} {1}": "swap {0} {1}"
+  "swap {0} {1}": "swap {0} {1}",
+  "Clique no notch pra abrir · botão direito: Ajustes": "Click the notch to open · right-click for Settings",
+  "Na barra de menus": "In the Menu Bar",
+  "Automático": "Automatic",
+  "Ícone e o Mac mais exigido": "Icon and busiest Mac",
+  "Só o ícone": "Icon only",
+  "No automático, Mac com notch mostra só o ícone: o que não cabe à direita do notch o macOS esconde. Os Ajustes também abrem com o botão direito no notch.": "On Automatic, a Mac with a notch shows only the icon: macOS hides menu bar items that don’t fit to the right of the notch. Settings also open with a right-click on the notch."
 }

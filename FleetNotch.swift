@@ -2715,7 +2715,27 @@ final class NotchView: NSView {
         CATransaction.commit()
     }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func mouseDown(with event: NSEvent) { passou(false); clique() }  // resposta no mouse down
+    override func mouseDown(with event: NSEvent) {  // resposta no mouse down
+        if event.modifierFlags.contains(.control) { return rightMouseDown(with: event) }
+        passou(false); clique()
+    }
+    /// Botão direito (ou Control-clique) no notch: o caminho pros Ajustes que não depende do ícone da barra de menus
+    /// (num MacBook com a barra cheia, o macOS esconde atrás do notch o que não cabe).
+    override func rightMouseDown(with event: NSEvent) {
+        passou(false)
+        let m = NSMenu()
+        for (titulo, acao) in [(t("Ajustes…"), #selector(menuAjustes)), (t("Assistente de configuração…"), #selector(menuAssistente))] {
+            m.addItem(withTitle: titulo, action: acao, keyEquivalent: "").target = self
+        }
+        m.addItem(.separator())
+        m.addItem(withTitle: t("Sair"), action: #selector(menuSair), keyEquivalent: "").target = self
+        NSMenu.popUpContextMenu(m, with: event, for: self)
+    }
+    @objc private func menuAjustes() { abrirAjustesGlobal() }
+    @objc private func menuAssistente() {
+        DistributedNotificationCenter.default().postNotificationName(.init(ID + ".assistente"), object: nil, userInfo: nil, deliverImmediately: true)
+    }
+    @objc private func menuSair() { NSApp.terminate(nil) }
 }
 
 /// A legenda do notch fechado: o mouse parou em cima dele e cada indicador ganha nome e estado, na mesma ordem e com o
@@ -2762,7 +2782,7 @@ struct LegendaNotch: View {
             if maqs.isEmpty && srvs.isEmpty && ags.isEmpty && contas.isEmpty {
                 Text(t("Nada configurado ainda: abra os Ajustes no menu da barra.")).font(.system(size: 11)).foregroundStyle(Paleta.secundario)
             }
-            Text(t("Clique no notch pra abrir")).font(.system(size: 10)).foregroundStyle(Paleta.terciario).padding(.top, 9)
+            Text(t("Clique no notch pra abrir · botão direito: Ajustes")).font(.system(size: 10)).foregroundStyle(Paleta.terciario).padding(.top, 9)
         }
         .padding(14)
         .frame(width: 300, alignment: .leading)
@@ -3253,9 +3273,7 @@ struct Conteudo: View {
         if let ss = m.estado.servidores, !ss.isEmpty {
             Divider()
             ForEach(Array(ss.enumerated()), id: \.offset) { _, s in
-                let p = ["⚪️", "🟢", "🟠", "🔴"][s.online ? max(0, min(max(s.nivel, s.alerta?.nivel ?? 0), 2)) + 1 : 0]
-                Button("\(p) \(s.nome) — " + (s.medidas.map { "CPU \($0.cpu)% · RAM \($0.ram)% · " + t("disco {0}%", $0.disco) } ?? (s.erro ?? t("fora do ar")))
-                       + (s.alerta.map { " · \($0.texto)" } ?? "")) {}
+                Button(Self.linhaServidor(s)) {}
             }
         }
         if let contas = m.estado.contas, !contas.isEmpty {
@@ -3283,13 +3301,31 @@ struct Conteudo: View {
     }
 }
 
+extension Conteudo {
+    /// Fora do body: com a concatenação inline o type-checker do Swift 6.1 (Command Line Tools mais antigas) estourava o tempo.
+    static func linhaServidor(_ s: Servidor) -> String {
+        let nivel: Int = s.online ? max(0, min(max(s.nivel, s.alerta?.nivel ?? 0), 2)) + 1 : 0
+        let p: String = ["⚪️", "🟢", "🟠", "🔴"][nivel]
+        var corpo: String = s.erro ?? t("fora do ar")
+        if let md = s.medidas { corpo = "CPU \(md.cpu)% · RAM \(md.ram)% · " + t("disco {0}%", md.disco) }
+        let alerta: String = s.alerta.map { " · \($0.texto)" } ?? ""
+        return "\(p) \(s.nome) — " + corpo + alerta
+    }
+}
+
+/// Tela principal com notch físico (MacBook): o que não cabe à direita do notch o macOS simplesmente não desenha.
+var telaComNotch: Bool { (NSScreen.screens.first?.safeAreaInsets.top ?? 0) > 0 }
+
 struct Rotulo: View {
     @ObservedObject var m: Modelo
+    @AppStorage("barraTexto") private var barraTexto = "auto"  // auto | texto | icone
     var body: some View {
-        // monocromático como os itens da Apple na barra: símbolo + o Mac mais exigido; ⚠︎ em texto (sem emoji colorido)
+        // monocromático como os itens da Apple na barra: símbolo + o Mac mais exigido; ⚠︎ em texto (sem emoji colorido).
+        // Em Mac com notch, no automático, só o símbolo: com texto o item não cabia e sumia (MacBook Air com a barra cheia).
+        let soIcone = barraTexto == "icone" || (barraTexto == "auto" && telaComNotch)
         HStack(spacing: 4) {
             Image(systemName: "gauge.with.dots.needle.33percent")
-            Text((m.estado.pico ?? "…").replacingOccurrences(of: "⚠️", with: "⚠︎"))
+            if !soIcone { Text((m.estado.pico ?? "…").replacingOccurrences(of: "⚠️", with: "⚠︎")) }
         }
     }
 }
