@@ -1,0 +1,23 @@
+name: ci
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Collector and actions tests (system Python, standard library only)
+        run: |
+          /usr/bin/python3 teste_coleta.py
+          /usr/bin/python3 teste_acoes.py
+      - name: Linux probe is POSIX sh
+        run: sh -n sonda_linux.sh
+      - name: Build the app with swiftc
+        run: swiftc -O -swift-version 5 -parse-as-library FleetNotch.swift Ajustes.swift Assistente.swift -o /tmp/FleetNotch
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

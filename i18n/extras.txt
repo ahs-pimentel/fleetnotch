@@ -1,0 +1,2 @@
+# Keys that are not in a t("…") call in the code (one per line). Today: the Location prompt in Info.plist (instalar.sh).
+Pra mostrar o nome da rede Wi-Fi na ilha: o macOS só entrega o nome da rede com Localização. A localização em si não é usada nem guardada.

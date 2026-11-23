@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FleetNotch: your whole fleet, in the notch</title>
+<meta name="description" content="Every Mac, server, AI agent and AI subscription you run, at a glance from the notch. Native macOS, read-only, no server.">
+<meta property="og:title" content="FleetNotch: your whole fleet, in the notch">
+<meta property="og:description" content="Native macOS. Read-only. No server, no account, nothing installed on the machines it watches.">
+<meta property="og:image" content="drawer.png">
+<style>
+  :root {
+    --bg: #07080d; --ink: rgba(255,255,255,.92); --ink-2: rgba(255,255,255,.66); --ink-3: rgba(255,255,255,.5);
+    --line: rgba(255,255,255,.1); --card: rgba(255,255,255,.045); --cyan: #64d2ff; --amber: #ff9f0a; --red: #ff453a;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  /* hero: a notch hanging from the top of the page, over the same gradient the demo was recorded on */
+  .hero { position: relative; overflow: hidden; padding: 0 0 72px;
+          background: radial-gradient(1200px 520px at 50% 105%, rgba(255,255,255,.12), transparent 60%),
+                      linear-gradient(180deg, #1c2145 0%, #45306b 55%, #8c4d80 100%); }
+  .notch { position: relative; width: 210px; height: 32px; margin: 0 auto; background: #000;
+           border-radius: 0 0 14px 14px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+  .notch::before, .notch::after { content: ""; position: absolute; top: 0; width: 8px; height: 8px;
+           background: radial-gradient(circle at 0 100%, transparent 7.5px, #000 8px); }
+  .notch::before { left: -8px; transform: scaleX(-1); } .notch::after { right: -8px; }
+  .dots { display: flex; gap: 4px; } .dots i { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.7); display: block; }
+  .dots i.amber { background: var(--amber); } .dots i.off { background: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+  .dots i.sq { border-radius: 1.2px; }
+  .rings { display: flex; gap: 4px; } .rings i { width: 9px; height: 9px; border-radius: 50%; display: block;
+           background: conic-gradient(rgba(255,255,255,.8) var(--p), rgba(255,255,255,.18) 0);
+           -webkit-mask: radial-gradient(circle, transparent 2.6px, #000 2.8px); mask: radial-gradient(circle, transparent 2.6px, #000 2.8px); }
+  .hero h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.02; letter-spacing: -.035em; margin: 72px 0 18px; text-align: center; font-weight: 700; }
+  .hero p.lede { max-width: 640px; margin: 0 auto; text-align: center; color: var(--ink-2); font-size: clamp(17px, 2.2vw, 21px); }
+  .cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 34px 0 52px; }
+  .install { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,.55); border: 1px solid var(--line);
+             border-radius: 14px; padding: 12px 12px 12px 18px; font: 15px var(--mono); max-width: 100%; }
+  .install code { white-space: nowrap; overflow: auto; }
+  button.copy, a.btn { font: 600 14px var(--sans); color: #000; background: #fff; border: 0; border-radius: 10px; padding: 9px 14px;
+           cursor: pointer; text-decoration: none; white-space: nowrap; }
+  a.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); align-self: center; }
+  .stage { display: flex; justify-content: center; }
+  .stage video, .stage img { width: min(960px, 100%); height: auto; border-radius: 22px; display: block;
+           box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .note { text-align: center; color: var(--ink-3); font-size: 13px; margin-top: 12px; }
+
+  section { padding: 88px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -.025em; line-height: 1.1; margin: 0 0 14px; }
+  .sub { color: var(--ink-2); max-width: 640px; margin: 0 0 40px; }
+  .feature { display: grid; grid-template-columns: 1fr 1.25fr; gap: 40px; align-items: center; margin: 0 0 72px; }
+  .feature:nth-child(even) .txt { order: 2; }
+  .feature h3 { font-size: 24px; letter-spacing: -.015em; margin: 0 0 10px; }
+  .feature p { color: var(--ink-2); margin: 0 0 10px; }
+  .feature img { width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); background: #000; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--cyan); margin-bottom: 8px; }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+  .card h3 { margin: 0 0 8px; font-size: 18px; } .card p { margin: 0; color: var(--ink-2); font-size: 15px; }
+  .check { color: var(--cyan); font-weight: 700; margin-right: 6px; }
+  pre { background: #000; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; overflow: auto; font: 14px/1.6 var(--mono); color: var(--ink-2); }
+  footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  @media (max-width: 760px) {
+    .feature { grid-template-columns: 1fr; gap: 18px; } .feature:nth-child(even) .txt { order: 0; }
+    .grid3 { grid-template-columns: 1fr; } section { padding: 64px 0; } .hero h1 { margin-top: 52px; }
+  }
+  @media (prefers-reduced-motion: reduce) { video { display: none; } .stage img.fallback { display: block !important; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="notch" aria-hidden="true">
+    <span class="dots"><i></i><i></i><i class="amber"></i><i class="off"></i><i class="sq"></i><i class="sq"></i></span>
+    <span class="rings"><i style="--p:42%"></i><i style="--p:18%"></i></span>
+  </div>
+  <div class="wrap">
+    <h1>Your whole fleet,<br>in the notch.</h1>
+    <p class="lede">Every Mac, every server, every AI agent and AI subscription you run, at a glance. One dot per machine.
+      Amber or red only when something needs you. Click, and everything opens like a watch face.</p>
+    <div class="cta">
+      <div class="install"><code id="cmd">git clone https://github.com/bisnishub/fleetnotch &amp;&amp; cd fleetnotch &amp;&amp; ./install.sh</code><button class="copy" id="copy">Copy</button></div>
+      <a class="btn ghost" href="https://github.com/bisnishub/fleetnotch">View on GitHub</a>
+    </div>
+    <div class="stage">
+      <video src="demo.mp4" autoplay muted loop playsinline poster="drawer.png" aria-label="Demo: legend on hover, the drawer, an agent page and a quick question"></video>
+      <img class="fallback" src="demo.gif" alt="Demo of FleetNotch" style="display:none">
+    </div>
+    <p class="note">Recorded in demo mode. Every name, number and email is made up.</p>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>Everything you run. Nothing you don't need.</h2>
+      <p class="sub">Notch apps show your music. Monitoring apps show one Mac in a wall of graphs. FleetNotch answers one question:
+        is everything I run OK right now?</p>
+
+      <div class="feature">
+        <div class="txt"><span class="tag">Macs</span><h3>Every Mac you own, nothing installed on them</h3>
+          <p>Found on Tailscale, read over SSH with a key. CPU, GPU and memory as Apple Watch–style rings, disks, temperature,
+          and everything plugged in, from displays to AirPods battery.</p></div>
+        <img src="drawer.png" alt="The drawer with activity rings for each Mac" loading="lazy">
+      </div>
+      <div class="feature">
+        <div class="txt"><span class="tag">Servers</span><h3>Linux servers, too</h3>
+          <p>A POSIX shell probe for your VPSs: CPU, RAM, disks, load, the systemd services you pick and your Docker containers.</p></div>
+        <img src="server.png" alt="A server page with services and containers" loading="lazy">
+      </div>
+      <div class="feature">
+        <div class="txt"><span class="tag">AI</span><h3>Agents, subscriptions and a quick ask</h3>
+          <p>Hermes, OpenClaw or any agent with a health URL, each with its own photo. Claude and ChatGPT usage as rings.
+          Press ⌃⌥Space to ask a quick question, answered by the CLI you are already signed in to, with every tool disabled.</p></div>
+        <img src="quick-ask.png" alt="A quick question answered in the drawer" loading="lazy">
+      </div>
+      <div class="feature">
+        <div class="txt"><span class="tag">Setup</span><h3>Native settings, a guided first run</h3>
+          <p>A real macOS Settings window. With no config, an assistant finds your Macs, explains the SSH key and installs it
+          (you type the remote password in Terminal, once).</p></div>
+        <img src="onboarding-ssh.png" alt="The first-run assistant, SSH key step" loading="lazy">
+      </div>
+      <div class="feature">
+        <div class="txt"><span class="tag">Glance</span><h3>A legend when you need it</h3>
+          <p>Hover the notch and every dot, square, arrow, eye and ring gets a name and a state. The notch itself stays clean.</p></div>
+        <img src="notch-legend.png" alt="The notch legend" loading="lazy" style="max-width:360px;justify-self:center">
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="wrap">
+      <h2>Read-only by design.</h2>
+      <p class="sub">No server, no telemetry, no account. The only network calls are the ones you configure.</p>
+      <div class="grid3">
+        <div class="card"><h3><span class="check">✓</span>Nothing installed</h3><p>Probes go through SSH stdin and leave nothing behind. No sudo.</p></div>
+        <div class="card"><h3><span class="check">✓</span>Secrets in the Keychain</h3><p>Never in the config file, never on a command line.</p></div>
+        <div class="card"><h3><span class="check">✓</span>Headers, not bodies</h3><p>Email shows unread counts and the latest sender and subject. The body is never requested.</p></div>
+        <div class="card"><h3><span class="check">✓</span>Agents untouched</h3><p>Status only. Never restarted, never messaged.</p></div>
+        <div class="card"><h3><span class="check">✓</span>Sandboxed quick ask</h3><p>Empty temp folder, no tools, no files, 90-second timeout.</p></div>
+        <div class="card"><h3><span class="check">✓</span>Light on your Mac</h3><p>A thin native shell (about 0.02% of a core when idle) over a stdlib-only Python collector (about 0.1–0.2%).</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <h2>Install in one line.</h2>
+      <pre>git clone https://github.com/bisnishub/fleetnotch &amp;&amp; cd fleetnotch &amp;&amp; ./install.sh</pre>
+      <p class="sub">Built from source on your Mac with the Command Line Tools: nothing to notarize, nothing for Gatekeeper to block.</p>
+      <p class="sub">macOS 14 or later. Optional: Tailscale, Remote Login on your other Macs, a Composio key for email, Claude Code or Codex for the quick ask.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span>FleetNotch · MIT License · © 2026 Eduardo Cavalcanti</span><a href="https://github.com/bisnishub/fleetnotch">GitHub</a></div>
+</footer>
+<script>
+  document.getElementById('copy').addEventListener('click', function () {
+    var b = this;
+    navigator.clipboard.writeText(document.getElementById('cmd').textContent).then(function () {
+      b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1600);
+    });
+  });
+</script>
+</body>
+</html>
