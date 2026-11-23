@@ -4,15 +4,16 @@ permissions:
   contents: read
 jobs:
   build-and-test:
-    runs-on: macos-14
+    runs-on: macos-latest  # macos-14 was retired by GitHub
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Collector and actions tests (system Python, standard library only)
+      - name: Collector, actions and translation tests (system Python, standard library only)
         run: |
           /usr/bin/python3 teste_coleta.py
           /usr/bin/python3 teste_acoes.py
+          /usr/bin/python3 teste_i18n.py
       - name: Linux probe is POSIX sh
         run: sh -n sonda_linux.sh
       - name: Build the app with swiftc
