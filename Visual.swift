@@ -631,19 +631,18 @@ struct MaterialMenu: NSViewRepresentable {
 final class ItemBarra: NSObject {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     let painel: Painel
-    private let conteudo: NSHostingView<ComIdioma<PainelBarra>>
+    private weak var app: AppDelegate?
+    private var conteudo: NSHostingView<ComIdioma<PainelBarra>>?  // só existe aberto: escondido, redesenhava a cada dado novo
     private var monitores: [Any] = []
     private var obs: [AnyCancellable] = []
 
     init(app: AppDelegate) {
         painel = Painel(chave: true)
-        conteudo = NSHostingView(rootView: ComIdioma { PainelBarra(m: app.modelo, cfg: app.cfg, app: app) })
-        conteudo.sizingOptions = []  // o tamanho é medido na hora (fittingSize): restrição automática + reposicionar dava laço de layout
+        self.app = app
         super.init()
         painel.level = .popUpMenu
         painel.hasShadow = true
         painel.title = ConfigStore.nomeApp + " · painel"  // invisível (sem barra): é por ele que o teste/grava.swift acha o painel
-        painel.contentView = conteudo
         if let b = item.button {
             b.image = NSImage(systemSymbolName: "gauge.with.dots.needle.33percent", accessibilityDescription: ConfigStore.nomeApp)
             b.imagePosition = .imageLeading
@@ -662,14 +661,19 @@ final class ItemBarra: NSObject {
     @objc func clique() { painel.isVisible ? fechar() : abrir() }
 
     func ajustar() {
-        guard painel.isVisible else { return }
+        guard painel.isVisible, let conteudo = conteudo else { return }
         let s = conteudo.fittingSize
         if s != painel.frame.size { painel.setContentSize(s) }
         posicionar()
     }
 
     func abrir() {
-        painel.setContentSize(conteudo.fittingSize)
+        guard let app = app else { return }
+        let c = NSHostingView(rootView: ComIdioma { PainelBarra(m: app.modelo, cfg: app.cfg, app: app) })
+        c.sizingOptions = []  // o tamanho é medido na hora (fittingSize): restrição automática + reposicionar dava laço de layout
+        conteudo = c
+        painel.contentView = c
+        painel.setContentSize(c.fittingSize)
         posicionar()
         painel.alphaValue = 0
         painel.orderFrontRegardless()
@@ -688,6 +692,8 @@ final class ItemBarra: NSObject {
         monitores = []
         item.button?.highlight(false)
         painel.orderOut(nil)
+        painel.contentView = nil
+        conteudo = nil
     }
 
     /// Embaixo do ícone, centrado nele e dentro da tela; o topo fica preso quando o tamanho muda.

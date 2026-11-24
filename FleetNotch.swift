@@ -3038,8 +3038,7 @@ final class Ilha {
         nv = NotchView(tamanho: notch)
         nv.clique = { [weak self] in self.map { $0.mudar(!$0.estado.aberta) } }
         nv.passou = { [weak self] dentro in self?.legenda(dentro) }
-        jLegenda.contentView = NSHostingView(rootView: ComIdioma { [modelo, cfg, estado] in LegendaJanela(m: modelo, cfg: cfg, ilha: estado) })
-        jLegenda.ignoresMouseEvents = true
+        jLegenda.ignoresMouseEvents = true  // o conteúdo só existe enquanto ela aparece (escondida, redesenhava a cada dado novo)
         jLegenda.alphaValue = 0
         jNotch.contentView = nv
         // notch UM NÍVEL ACIMA da gaveta: no mesmo nível, um clique dentro da gaveta a trazia pra frente e o filete de
@@ -3113,7 +3112,9 @@ final class Ilha {
     }
 
     func mostrarLegenda() {
-        guard !estado.aberta, let v = jLegenda.contentView else { return }
+        guard !estado.aberta else { return }
+        let v = jLegenda.contentView ?? NSHostingView(rootView: ComIdioma { [modelo, cfg, estado] in LegendaJanela(m: modelo, cfg: cfg, ilha: estado) })
+        jLegenda.contentView = v
         let s = v.fittingSize, f = tela.frame
         jLegenda.setFrame(NSRect(x: (f.midX - s.width / 2).rounded(), y: f.maxY - notch.height - 8 - s.height, width: s.width, height: s.height), display: true)
         jLegenda.orderFrontRegardless()
@@ -3124,6 +3125,7 @@ final class Ilha {
         NSAnimationContext.runAnimationGroup({ c in c.duration = Paleta.reduzir ? 0 : 0.12; jLegenda.animator().alphaValue = 0 }) { [weak self] in
             guard let s = self, s.jLegenda.alphaValue == 0 else { return }
             s.jLegenda.orderOut(nil)
+            s.jLegenda.contentView = nil
             s.estado.dica = false
         }
     }
