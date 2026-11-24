@@ -7,6 +7,7 @@ import CoreLocation
 import CoreWLAN
 import SwiftUI
 import UniformTypeIdentifiers
+import UserNotifications
 
 // MARK: - Idiomas
 
@@ -245,6 +246,7 @@ final class Modelo: ObservableObject {
                         await MainActor.run {
                             trafego.iface = e.maquinas.first { $0.local == true }?.detalhe?.net?.iface
                             if Paleta.reduzir { self.estado = e } else { withAnimation(.spring(response: 0.6, dampingFraction: 1)) { self.estado = e } }
+                            self.avisarVermelhos(e)
                         }
                     }
                 }
@@ -254,6 +256,29 @@ final class Modelo: ObservableObject {
             // coleta.py morreu (não deveria): mostra e reinicia
             await MainActor.run { self.estado = Estado.vazio("⚪️ coletor parado") }
             try? await Task.sleep(nanoseconds: 5_000_000_000)
+        }
+    }
+
+    /// Macs no vermelho no último estado. Começa vazio: na abertura, cada Mac que já está vermelho avisa uma vez.
+    private var vermelhos: Set<String> = []
+
+    /// Notificação do macOS quando um Mac entra no vermelho (o mesmo do notch: nível 2 da máquina ou do alerta).
+    /// Uma por entrada: enquanto continua vermelho não repete. O demo não notifica e, ao sair dele, conta como abertura.
+    func avisarVermelhos(_ e: Estado) {
+        if demo() { vermelhos = []; return }
+        // Mac ausente ou sem medidas (sonda estourou, ciclo de erro) mantém o estado: só sai do vermelho quem volta são.
+        for q in e.maquinas where q.medidas != nil {
+            guard let chave = q.id ?? q.nome else { continue }  // o título traz a CPU em %, muda a cada ciclo
+            let graves = motivos(q).filter { $0.nivel >= 2 }
+            if graves.isEmpty { vermelhos.remove(chave); continue }
+            guard vermelhos.insert(chave).inserted else { continue }
+            let n = UNMutableNotificationContent()  // sem título: os motivos já trazem o nome do Mac
+            n.body = graves.map(\.texto).joined(separator: " · ")
+            n.sound = .default
+            let c = UNUserNotificationCenter.current()
+            c.requestAuthorization(options: [.alert, .sound]) { ok, _ in  // só pergunta na primeira vez; depois devolve a resposta guardada
+                if ok { c.add(UNNotificationRequest(identifier: "vermelho:" + chave, content: n, trigger: nil)) }
+            }
         }
     }
 }
@@ -905,10 +930,7 @@ struct Mostrador: View {
 /// O que mais pede atenção, do pior pro menos grave (é o que a legenda mostra quando nada está sob o mouse).
 func atencao(_ e: Estado) -> [(nivel: Int, texto: String)] {
     var r: [(nivel: Int, texto: String)] = []
-    for q in e.maquinas where q.medidas != nil {
-        if let a = q.alerta { r.append((a.nivel, t("{0} no {1}", a.texto, q.curto ?? q.nome ?? ""))) }
-        if q.nivel >= 1 { r.append((q.nivel, t("{0} muito exigido", q.nome ?? ""))) }
-    }
+    for q in e.maquinas where q.medidas != nil { r += motivos(q) }
     for s in e.servidores ?? [] {
         if !s.online { r.append((2, t("{0} fora do ar ({1})", s.nome, s.erro ?? t("sem resposta")))) }
         if let a = s.alerta { r.append((a.nivel, t("{0} no {1}", a.texto, s.nome))) }
@@ -923,6 +945,14 @@ func atencao(_ e: Estado) -> [(nivel: Int, texto: String)] {
     if let p = e.sincronizacao?.problema { r.append((1, p)) }
     for c in e.contas ?? [] where c.nivel >= 1 { r.append((c.nivel, "\(c.rotulo): " + usoJanela(c) + " · " + t("volta {0}", c.reset ?? "—"))) }
     return r.enumerated().sorted { ($0.element.nivel, -$0.offset) > ($1.element.nivel, -$1.offset) }.map(\.element)
+}
+
+/// O que pede atenção num Mac (alerta e carga), no texto da legenda.
+func motivos(_ q: Maquina) -> [(nivel: Int, texto: String)] {
+    var r: [(nivel: Int, texto: String)] = []
+    if let a = q.alerta { r.append((a.nivel, t("{0} no {1}", a.texto, q.curto ?? q.nome ?? ""))) }
+    if q.nivel >= 1 { r.append((q.nivel, t("{0} muito exigido", q.nome ?? ""))) }
+    return r
 }
 
 /// Título do cron-watchdog em português de gente: "Execução não concluiu: X" vira "Cron falhando: X".
@@ -3095,7 +3125,7 @@ func abrirAjustesGlobal() {
 }
 var atalhoGlobal: () -> Void = {}
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     let cfg = ConfigStore()
     let modelo = Modelo()
     let ajustes = EstadoAjustes()
@@ -3108,8 +3138,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var fundo: NSWindow?, faixa: NSWindow?
 
+    /// Com os Ajustes abertos o app fica ativo, e o macOS esconde a notificação de app ativo: mostra mesmo assim.
+    func userNotificationCenter(_ c: UNUserNotificationCenter, willPresent n: UNNotification,
+                                withCompletionHandler f: @escaping (UNNotificationPresentationOptions) -> Void) { f([.banner, .sound]) }
+
     func applicationDidFinishLaunching(_ n: Notification) {
         modelo.demo = { [cfg] in cfg.c.demo }
+        UNUserNotificationCenter.current().delegate = self
         modelo.iniciar()
         if ProcessInfo.processInfo.environment["FROTA_FUNDO"] != nil, let t = NSScreen.screens.first {
             // só pra gravar o README: um fundo neutro atrás da ilha (no lugar do papel de parede e das janelas de quem grava)
