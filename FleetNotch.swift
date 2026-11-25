@@ -512,6 +512,8 @@ struct Aneis: View {
                      estilo: Paleta.v.estilo.aneis[i])
             }
         }
+        // dica do sistema ao parar o mouse: diz qual anel é qual sem depender da legenda do rodapé
+        .help((0..<3).map { "\(nomeMetrica(k[$0])) \(md.texto(k[$0]))" }.joined(separator: " · "))
     }
 }
 
@@ -1074,7 +1076,7 @@ struct Satelite: View {
     }
 }
 
-/// "● 9  ● 0  ● 53": o ponto colorido é a legenda do anel.
+/// "● CPU 9  ● GPU 0  ● RAM 53": o ponto colorido liga o número ao anel e o nome diz qual é (sem depender da legenda).
 struct Numeros: View {
     var visual = Paleta.v  // o gosto como entrada: quem cria a view com a config nova muda a entrada, e ela redesenha
     let v: [Int], tamanho: CGFloat
@@ -1083,6 +1085,7 @@ struct Numeros: View {
             ForEach(0..<3, id: \.self) { i in
                 HStack(spacing: 3) {
                     Circle().fill(Paleta.metricas[i]).frame(width: 5, height: 5)
+                    Text(Paleta.nomes[i]).font(.system(size: tamanho - 1, weight: .semibold)).foregroundStyle(Paleta.terciario)
                     Text("\(v[i])").font(.system(size: tamanho, weight: .medium, design: .rounded).monospacedDigit())
                         .foregroundStyle(Paleta.secundario).contentTransition(.numericText(value: Double(v[i])))
                 }
